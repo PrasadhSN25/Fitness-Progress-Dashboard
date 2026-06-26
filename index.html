@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORM — Training Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#EEF1EE;
+    --surface:#FFFFFF;
+    --ink:#15201B;
+    --accent:#FF5A1F;
+    --accent-2:#1B6B63;
+    --gold:#D9A441;
+    --line:#D7DCD6;
+    --muted:#5B6760;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding:0 0 80px 0;
+  }
+  .wrap{max-width:1180px; margin:0 auto; padding:0 28px;}
+
+  /* ===== HEADER ===== */
+  header.top{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:28px 0 22px;
+    border-bottom:1px solid var(--line);
+  }
+  .wordmark{
+    font-family:'Archivo Black', sans-serif;
+    font-size:26px;
+    letter-spacing:-0.5px;
+    display:flex; align-items:baseline; gap:8px;
+  }
+  .wordmark span{
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    font-weight:400;
+    color:var(--muted);
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+  }
+  nav.tabs{display:flex; gap:6px; background:var(--surface); padding:4px; border-radius:10px; border:1px solid var(--line);}
+  nav.tabs button{
+    font-family:'Inter',sans-serif; font-weight:600; font-size:13px;
+    border:none; background:transparent; color:var(--muted);
+    padding:8px 16px; border-radius:8px; cursor:pointer;
+    transition:background .15s, color .15s;
+  }
+  nav.tabs button.active{background:var(--ink); color:#fff;}
+
+  /* ===== HERO ===== */
+  .hero{
+    display:grid; grid-template-columns:1.3fr 1fr; gap:24px;
+    padding:40px 0 36px;
+    align-items:stretch;
+  }
+  .hero-main{
+    background:var(--ink); color:#F4F2EC;
+    border-radius:var(--radius);
+    padding:36px 36px 30px;
+    position:relative; overflow:hidden;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px, transparent 1px, transparent 26px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px, transparent 1px, transparent 26px);
+  }
+  .hero-eyebrow{
+    font-family:'Space Mono', monospace; font-size:12px; letter-spacing:2px;
+    text-transform:uppercase; color:var(--gold); margin-bottom:18px;
+  }
+  .streak-row{display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap;}
+  .streak-number{
+    font-family:'Archivo Black', sans-serif;
+    font-size:96px; line-height:0.85; letter-spacing:-2px;
+  }
+  .streak-label{font-size:16px; color:#C9CFC8; max-width:220px; padding-bottom:10px;}
+  .hero-foot{
+    margin-top:24px; display:flex; gap:12px; flex-wrap:wrap;
+  }
+  .btn{
+    font-family:'Inter',sans-serif; font-weight:700; font-size:14px;
+    border:none; cursor:pointer; border-radius:9px; padding:12px 18px;
+    transition:transform .12s ease, opacity .12s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--accent); color:#fff;}
+  .btn-primary:hover{opacity:0.92;}
+  .btn-ghost{background:rgba(255,255,255,0.08); color:#F4F2EC; border:1px solid rgba(255,255,255,0.18);}
+  .btn-ghost:hover{background:rgba(255,255,255,0.14);}
+
+  .hero-side{
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .mini-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px 20px; flex:1; display:flex; flex-direction:column; justify-content:center;
+  }
+  .mini-card .k{font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.6px;}
+  .mini-card .v{font-family:'Space Mono', monospace; font-size:30px; font-weight:700; margin-top:4px;}
+  .mini-card .v.up{color:var(--accent-2);}
+  .mini-card .v.down{color:var(--accent);}
+  .mini-card .delta{font-size:12px; color:var(--muted); margin-top:2px;}
+
+  /* ===== SCOREBOARD ===== */
+  .scoreboard{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
+    padding-bottom:36px;
+  }
+  .score-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:20px 22px;
+  }
+  .score-card .label{font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.6px;}
+  .score-card .num{font-family:'Space Mono', monospace; font-size:34px; font-weight:700; margin-top:8px;}
+  .score-card .unit{font-size:13px; color:var(--muted); font-weight:500;}
+
+  /* ===== SECTION HEADERS ===== */
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .section-head h2{
+    font-family:'Archivo Black', sans-serif; font-size:20px; letter-spacing:-0.3px;
+  }
+  .section-head .sub{font-size:13px; color:var(--muted);}
+
+  /* ===== CHARTS ===== */
+  .charts-row{
+    display:grid; grid-template-columns:1.4fr 1fr; gap:20px;
+    padding-bottom:40px;
+  }
+  .panel{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:22px;
+  }
+  .panel canvas{max-height:260px;}
+
+  /* ===== LEDGER (signature element) ===== */
+  .ledger-section{padding-bottom:44px;}
+  .ledger{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:24px; overflow-x:auto;
+  }
+  .ledger-grid{
+    display:grid;
+    grid-auto-flow:column;
+    grid-template-rows:repeat(7, 16px);
+    gap:4px;
+    width:max-content;
+  }
+  .ledger-cell{
+    width:16px; height:16px; border-radius:3px; background:#E4E8E3;
+    position:relative;
+  }
+  .ledger-cell[data-i="1"]{background:#CFE0DA;}
+  .ledger-cell[data-i="2"]{background:#8FBDAF;}
+  .ledger-cell[data-i="3"]{background:var(--accent-2);}
+  .ledger-cell[data-i="4"]{background:var(--accent);}
+  .ledger-cell:hover::after{
+    content:attr(data-tip);
+    position:absolute; bottom:22px; left:50%; transform:translateX(-50%);
+    background:var(--ink); color:#fff; font-size:11px; padding:5px 8px;
+    border-radius:6px; white-space:nowrap; z-index:5; font-family:'Space Mono',monospace;
+  }
+  .ledger-legend{
+    display:flex; align-items:center; gap:6px; margin-top:14px; font-size:11px; color:var(--muted);
+  }
+  .ledger-legend .ledger-cell{cursor:default;}
+
+  /* ===== LOG TABLE ===== */
+  .log-section{padding-bottom:20px;}
+  table.log{width:100%; border-collapse:collapse;}
+  table.log th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.6px;
+    color:var(--muted); font-weight:600; padding:10px 14px; border-bottom:1px solid var(--line);
+  }
+  table.log td{
+    padding:13px 14px; font-size:14px; border-bottom:1px solid var(--line);
+  }
+  table.log tr:last-child td{border-bottom:none;}
+  .tag{
+    font-size:11px; font-weight:700; padding:4px 9px; border-radius:20px;
+    text-transform:uppercase; letter-spacing:0.4px;
+    background:#E4ECE9; color:var(--accent-2);
+  }
+  .tag.cardio{background:#FCE6DB; color:var(--accent);}
+  .tag.mobility{background:#F1E7CF; color:#9A7411;}
+  .row-del{
+    border:none; background:none; color:var(--muted); cursor:pointer; font-size:13px;
+  }
+  .row-del:hover{color:var(--accent);}
+  .empty-row td{padding:30px 14px; color:var(--muted); text-align:center; font-size:13px;}
+
+  /* ===== MODAL ===== */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(21,32,27,0.55);
+    display:none; align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .modal-backdrop.show{display:flex;}
+  .modal{
+    background:var(--surface); border-radius:var(--radius); padding:28px;
+    width:100%; max-width:380px;
+  }
+  .modal h3{font-family:'Archivo Black',sans-serif; font-size:18px; margin-bottom:18px;}
+  .field{margin-bottom:14px;}
+  .field label{font-size:12px; font-weight:600; color:var(--muted); display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.4px;}
+  .field input, .field select{
+    width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px;
+    font-family:'Inter',sans-serif; font-size:14px; background:#FBFBFA;
+  }
+  .field input:focus, .field select:focus{outline:2px solid var(--accent-2); outline-offset:1px;}
+  .modal-actions{display:flex; gap:10px; margin-top:20px;}
+  .modal-actions .btn{flex:1;}
+  .btn-cancel{background:#EEF1EE; color:var(--ink);}
+
+  footer.note{
+    text-align:center; font-size:12px; color:var(--muted); padding-top:10px;
+  }
+
+  @media (max-width:860px){
+    .hero{grid-template-columns:1fr;}
+    .scoreboard{grid-template-columns:repeat(2,1fr);}
+    .charts-row{grid-template-columns:1fr;}
+    .streak-number{font-size:72px;}
+    nav.tabs{display:none;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="wordmark">FORM<span>training ledger</span></div>
+    <nav class="tabs">
+      <button class="active">Overview</button>
+      <button>History</button>
+      <button>Goals</button>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-main">
+      <div class="hero-eyebrow">Current streak</div>
+      <div class="streak-row">
+        <div class="streak-number" id="streakNum">0</div>
+        <div class="streak-label" id="streakLabel">days trained in a row. Log today's session to keep it alive.</div>
+      </div>
+      <div class="hero-foot">
+        <button class="btn btn-primary" id="openWorkoutModal">+ Log workout</button>
+        <button class="btn btn-ghost" id="openWeightModal">+ Log bodyweight</button>
+      </div>
+    </div>
+    <div class="hero-side">
+      <div class="mini-card">
+        <div class="k">Latest bodyweight</div>
+        <div class="v" id="latestWeight">—</div>
+        <div class="delta" id="weightDelta">No entries yet</div>
+      </div>
+      <div class="mini-card">
+        <div class="k">This week</div>
+        <div class="v" id="weekCount">0</div>
+        <div class="delta">sessions logged</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCOREBOARD -->
+  <section class="scoreboard">
+    <div class="score-card">
+      <div class="label">Total sessions</div>
+      <div class="num" id="totalSessions">0</div>
+      <div class="unit">all time</div>
+    </div>
+    <div class="score-card">
+      <div class="label">Volume (30d)</div>
+      <div class="num" id="totalVolume">0</div>
+      <div class="unit">lb lifted</div>
+    </div>
+    <div class="score-card">
+      <div class="label">Avg duration</div>
+      <div class="num" id="avgDuration">0</div>
+      <div class="unit">minutes / session</div>
+    </div>
+    <div class="score-card">
+      <div class="label">Longest streak</div>
+      <div class="num" id="longestStreak">0</div>
+      <div class="unit">consecutive days</div>
+    </div>
+  </section>
+
+  <!-- CHARTS -->
+  <section>
+    <div class="section-head">
+      <h2>Trends</h2>
+      <div class="sub">Bodyweight and weekly training volume</div>
+    </div>
+    <div class="charts-row">
+      <div class="panel">
+        <canvas id="weightChart"></canvas>
+      </div>
+      <div class="panel">
+        <canvas id="volumeChart"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEDGER (signature element) -->
+  <section class="ledger-section">
+    <div class="section-head">
+      <h2>The Ledger</h2>
+      <div class="sub">Every trained day, last 12 weeks — darker means harder</div>
+    </div>
+    <div class="ledger">
+      <div class="ledger-grid" id="ledgerGrid"></div>
+      <div class="ledger-legend">
+        <span>Less</span>
+        <div class="ledger-cell" data-i="0"></div>
+        <div class="ledger-cell" data-i="1"></div>
+        <div class="ledger-cell" data-i="2"></div>
+        <div class="ledger-cell" data-i="3"></div>
+        <div class="ledger-cell" data-i="4"></div>
+        <span>More</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOG -->
+  <section class="log-section">
+    <div class="section-head">
+      <h2>Recent sessions</h2>
+      <div class="sub" id="logCount">0 entries</div>
+    </div>
+    <div class="panel" style="padding:0;">
+      <table class="log">
+        <thead>
+          <tr><th>Date</th><th>Type</th><th>Duration</th><th>Volume</th><th>Notes</th><th></th></tr>
+        </thead>
+        <tbody id="logBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="note">Data resets on page reload — wire this up to your own backend or storage to persist it.</footer>
+</div>
+
+<!-- WORKOUT MODAL -->
+<div class="modal-backdrop" id="workoutBackdrop">
+  <div class="modal">
+    <h3>Log a workout</h3>
+    <div class="field">
+      <label for="wDate">Date</label>
+      <input type="date" id="wDate">
+    </div>
+    <div class="field">
+      <label for="wType">Type</label>
+      <select id="wType">
+        <option value="strength">Strength</option>
+        <option value="cardio">Cardio</option>
+        <option value="mobility">Mobility</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="wDuration">Duration (minutes)</label>
+      <input type="number" id="wDuration" min="1" placeholder="45">
+    </div>
+    <div class="field">
+      <label for="wVolume">Volume lifted (lb, optional)</label>
+      <input type="number" id="wVolume" min="0" placeholder="6200">
+    </div>
+    <div class="field">
+      <label for="wNotes">Notes</label>
+      <input type="text" id="wNotes" placeholder="Heavy squat day">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" data-close="workoutBackdrop">Cancel</button>
+      <button class="btn btn-primary" id="saveWorkout">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- WEIGHT MODAL -->
+<div class="modal-backdrop" id="weightBackdrop">
+  <div class="modal">
+    <h3>Log bodyweight</h3>
+    <div class="field">
+      <label for="bwDate">Date</label>
+      <input type="date" id="bwDate">
+    </div>
+    <div class="field">
+      <label for="bwWeight">Weight (lb)</label>
+      <input type="number" id="bwWeight" min="0" step="0.1" placeholder="178.4">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" data-close="weightBackdrop">Cancel</button>
+      <button class="btn btn-primary" id="saveWeight">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---------- helpers ----------
+  const fmtDate = (d) => {
+    const dt = (d instanceof Date) ? d : new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  };
+  const isoDate = (d) => d.toISOString().slice(0,10);
+  const todayIso = () => isoDate(new Date());
+
+  function daysAgoIso(n){
+    const d = new Date();
+    d.setDate(d.getDate()-n);
+    return isoDate(d);
+  }
+
+  // ---------- seed data ----------
+  let workouts = [
+    {date: daysAgoIso(0), type:'strength', duration:52, volume:7400, notes:'Squat + bench day'},
+    {date: daysAgoIso(1), type:'cardio', duration:30, volume:0, notes:'Easy 5k'},
+    {date: daysAgoIso(2), type:'strength', duration:48, volume:6800, notes:'Pull day'},
+    {date: daysAgoIso(3), type:'mobility', duration:25, volume:0, notes:'Hips + shoulders'},
+    {date: daysAgoIso(5), type:'strength', duration:60, volume:8100, notes:'Deadlift PR attempt'},
+    {date: daysAgoIso(6), type:'cardio', duration:40, volume:0, notes:'Tempo run'},
+    {date: daysAgoIso(8), type:'strength', duration:50, volume:7000, notes:'Push day'},
+    {date: daysAgoIso(9), type:'strength', duration:55, volume:7600, notes:'Legs'},
+    {date: daysAgoIso(12), type:'cardio', duration:35, volume:0, notes:'Intervals'},
+    {date: daysAgoIso(14), type:'strength', duration:58, volume:8400, notes:'Full body'},
+  ];
+  let weights = [
+    {date: daysAgoIso(28), weight:182.1},
+    {date: daysAgoIso(21), weight:181.0},
+    {date: daysAgoIso(14), weight:180.2},
+    {date: daysAgoIso(7), weight:179.0},
+    {date: daysAgoIso(0), weight:178.4},
+  ];
+
+  let idCounter = 1000;
+  workouts.forEach(w => w.id = idCounter++);
+
+  // ---------- DOM refs ----------
+  const el = (id) => document.getElementById(id);
+  const logBody = el('logBody');
+  const ledgerGrid = el('ledgerGrid');
+
+  // ---------- core render ----------
+  function render(){
+    renderStats();
+    renderLog();
+    renderLedger();
+    renderCharts();
+  }
+
+  function intensityScore(w){
+    if(w.type === 'mobility') return 1;
+    if(w.type === 'cardio') return w.duration >= 40 ? 3 : 2;
+    // strength
+    if(w.volume >= 8000) return 4;
+    if(w.volume >= 6000) return 3;
+    return 2;
+  }
+
+  function computeStreaks(){
+    const trainedDays = new Set(workouts.map(w => w.date));
+    // current streak: walk back from today
+    let cur = 0;
+    let cursor = new Date();
+    while(trainedDays.has(isoDate(cursor))){
+      cur++;
+      cursor.setDate(cursor.getDate()-1);
+    }
+    // longest streak across all known days
+    const sortedDays = Array.from(trainedDays).sort();
+    let longest = 0, run = 0, prev = null;
+    sortedDays.forEach(dStr => {
+      const d = new Date(dStr + 'T00:00:00');
+      if(prev){
+        const diff = Math.round((d - prev)/86400000);
+        run = diff === 1 ? run+1 : 1;
+      } else { run = 1; }
+      longest = Math.max(longest, run);
+      prev = d;
+    });
+    return {current: cur, longest: Math.max(longest, cur)};
+  }
+
+  function renderStats(){
+    const streaks = computeStreaks();
+    el('streakNum').textContent = streaks.current;
+    el('streakLabel').textContent = streaks.current > 0
+      ? `days trained in a row. Don't break it today.`
+      : `days trained in a row. Log today's session to start one.`;
+    el('longestStreak').textContent = streaks.longest;
+
+    el('totalSessions').textContent = workouts.length;
+
+    const cutoff = daysAgoIso(30);
+    const vol30 = workouts.filter(w => w.date >= cutoff).reduce((s,w) => s + (w.volume||0), 0);
+    el('totalVolume').textContent = vol30.toLocaleString();
+
+    const avgDur = workouts.length ? Math.round(workouts.reduce((s,w)=>s+w.duration,0)/workouts.length) : 0;
+    el('avgDuration').textContent = avgDur;
+
+    const weekCutoff = daysAgoIso(6);
+    const weekCount = workouts.filter(w => w.date >= weekCutoff).length;
+    el('weekCount').textContent = weekCount;
+
+    if(weights.length){
+      const sorted = [...weights].sort((a,b)=> a.date.localeCompare(b.date));
+      const latest = sorted[sorted.length-1];
+      el('latestWeight').textContent = latest.weight.toFixed(1) + ' lb';
+      if(sorted.length > 1){
+        const prev = sorted[sorted.length-2];
+        const diff = (latest.weight - prev.weight);
+        const sign = diff > 0 ? '+' : '';
+        el('weightDelta').textContent = `${sign}${diff.toFixed(1)} lb since last entry`;
+        el('latestWeight').className = 'v ' + (diff <= 0 ? 'up' : 'down');
+      } else {
+        el('weightDelta').textContent = 'First entry logged';
+        el('latestWeight').className = 'v';
+      }
+    }
+  }
+
+  function renderLog(){
+    const sorted = [...workouts].sort((a,b)=> b.date.localeCompare(a.date)).slice(0,12);
+    el('logCount').textContent = `${workouts.length} entries`;
+    if(!sorted.length){
+      logBody.innerHTML = `<tr class="empty-row"><td colspan="6">No sessions logged yet. Hit "Log workout" to start your ledger.</td></tr>`;
+      return;
+    }
+    logBody.innerHTML = sorted.map(w => `
+      <tr>
+        <td>${fmtDate(w.date)}</td>
+        <td><span class="tag ${w.type}">${w.type}</span></td>
+        <td>${w.duration} min</td>
+        <td>${w.volume ? w.volume.toLocaleString() + ' lb' : '—'}</td>
+        <td style="color:var(--muted)">${w.notes || ''}</td>
+        <td><button class="row-del" data-id="${w.id}" aria-label="Delete entry">✕</button></td>
+      </tr>
+    `).join('');
+    logBody.querySelectorAll('.row-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = Number(btn.getAttribute('data-id'));
+        workouts = workouts.filter(w => w.id !== id);
+        render();
+      });
+    });
+  }
+
+  function renderLedger(){
+    // build last 84 days (12 weeks), aligned to weekday rows
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const totalDays = 84;
+    const start = new Date(today);
+    start.setDate(start.getDate() - (totalDays - 1));
+    // shift start back to a Sunday so columns are clean weeks
+    const startDow = start.getDay();
+    start.setDate(start.getDate() - startDow);
+
+    const byDate = {};
+    workouts.forEach(w => {
+      const score = intensityScore(w);
+      if(!byDate[w.date] || score > byDate[w.date]) byDate[w.date] = score;
+    });
+
+    let html = '';
+    let cursor = new Date(start);
+    const endBound = new Date(today);
+    while(cursor <= endBound){
+      const iso = isoDate(cursor);
+      const score = byDate[iso] || 0;
+      const tip = `${fmtDate(iso)}${score ? ' — trained' : ''}`;
+      html += `<div class="ledger-cell" data-i="${score}" data-tip="${tip}"></div>`;
+      cursor.setDate(cursor.getDate()+1);
+    }
+    ledgerGrid.innerHTML = html;
+  }
+
+  let weightChartInst = null;
+  let volumeChartInst = null;
+
+  function renderCharts(){
+    const sortedW = [...weights].sort((a,b)=> a.date.localeCompare(b.date));
+    const ctx1 = document.getElementById('weightChart');
+    if(weightChartInst) weightChartInst.destroy();
+    weightChartInst = new Chart(ctx1, {
+      type:'line',
+      data:{
+        labels: sortedW.map(w => fmtDate(w.date)),
+        datasets:[{
+          label:'Bodyweight (lb)',
+          data: sortedW.map(w => w.weight),
+          borderColor:'#1B6B63',
+          backgroundColor:'rgba(27,107,99,0.12)',
+          fill:true,
+          tension:0.35,
+          pointRadius:4,
+          pointBackgroundColor:'#1B6B63',
+        }]
+      },
+      options:{
+        responsive:true,
+        plugins:{legend:{display:false}, title:{display:true, text:'Bodyweight trend', font:{family:'Inter', size:13, weight:'600'}, color:'#15201B', padding:{bottom:14}}},
+        scales:{
+          y:{grid:{color:'#EEF1EE'}, ticks:{font:{family:'Space Mono', size:11}}},
+          x:{grid:{display:false}, ticks:{font:{family:'Inter', size:11}}}
+        }
+      }
+    });
+
+    // weekly volume, last 8 weeks
+    const weekBuckets = [];
+    for(let i=7;i>=0;i--){
+      const wkStart = daysAgoIso(i*7+6);
+      const wkEnd = daysAgoIso(i*7);
+      const total = workouts.filter(w => w.date >= wkStart && w.date <= wkEnd)
+        .reduce((s,w)=> s+(w.volume||0), 0);
+      weekBuckets.push({label: `Wk -${i}`, total});
+    }
+    const ctx2 = document.getElementById('volumeChart');
+    if(volumeChartInst) volumeChartInst.destroy();
+    volumeChartInst = new Chart(ctx2, {
+      type:'bar',
+      data:{
+        labels: weekBuckets.map(b=>b.label),
+        datasets:[{
+          label:'Volume (lb)',
+          data: weekBuckets.map(b=>b.total),
+          backgroundColor:'#FF5A1F',
+          borderRadius:5,
+          maxBarThickness:28,
+        }]
+      },
+      options:{
+        responsive:true,
+        plugins:{legend:{display:false}, title:{display:true, text:'Weekly volume', font:{family:'Inter', size:13, weight:'600'}, color:'#15201B', padding:{bottom:14}}},
+        scales:{
+          y:{grid:{color:'#EEF1EE'}, ticks:{font:{family:'Space Mono', size:11}}},
+          x:{grid:{display:false}, ticks:{font:{family:'Inter', size:10}}}
+        }
+      }
+    });
+  }
+
+  // ---------- modals ----------
+  function openModal(id){ el(id).classList.add('show'); }
+  function closeModal(id){ el(id).classList.remove('show'); }
+
+  el('openWorkoutModal').addEventListener('click', () => {
+    el('wDate').value = todayIso();
+    el('wDuration').value = '';
+    el('wVolume').value = '';
+    el('wNotes').value = '';
+    openModal('workoutBackdrop');
+  });
+  el('openWeightModal').addEventListener('click', () => {
+    el('bwDate').value = todayIso();
+    el('bwWeight').value = '';
+    openModal('weightBackdrop');
+  });
+  document.querySelectorAll('[data-close]').forEach(btn => {
+    btn.addEventListener('click', () => closeModal(btn.getAttribute('data-close')));
+  });
+  document.querySelectorAll('.modal-backdrop').forEach(bd => {
+    bd.addEventListener('click', (e) => { if(e.target === bd) closeModal(bd.id); });
+  });
+
+  el('saveWorkout').addEventListener('click', () => {
+    const date = el('wDate').value || todayIso();
+    const type = el('wType').value;
+    const duration = Number(el('wDuration').value) || 0;
+    const volume = Number(el('wVolume').value) || 0;
+    const notes = el('wNotes').value.trim();
+    if(duration <= 0){ el('wDuration').focus(); return; }
+    workouts.push({id: idCounter++, date, type, duration, volume, notes});
+    closeModal('workoutBackdrop');
+    render();
+  });
+
+  el('saveWeight').addEventListener('click', () => {
+    const date = el('bwDate').value || todayIso();
+    const weight = Number(el('bwWeight').value);
+    if(!weight || weight <= 0){ el('bwWeight').focus(); return; }
+    weights.push({date, weight});
+    closeModal('weightBackdrop');
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
